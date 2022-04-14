@@ -8,14 +8,10 @@ require('dotenv').config();
 
 const port = process.env.PORT || 5000;
 const mongoString =
-  process.env.MONGODB_STRING || 'mongodb://localhost/jwt-test';
+  process.env.MONGODB_STRING || 'mongodb://localhost/realtime-chat';
 
 mongoose
-  .connect(mongoString, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-  })
+  .connect(mongoString)
   .then(() => {
     console.log('connected to MongoDB');
   })
@@ -29,7 +25,6 @@ app.use(morgan('tiny'));
 app.use('/api/users', require('./routes/api/users'));
 
 if (process.env.NODE_ENV === 'production') {
-  // Set static folder
   app.use(express.static('client/build'));
 
   app.get('*', (req, res) => {
@@ -44,5 +39,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, (req, res) => {
-  console.log(`listening on port ${port}`);
+  console.log(`Server listening on port ${port}`);
 });

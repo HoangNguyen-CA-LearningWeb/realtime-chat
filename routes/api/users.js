@@ -1,6 +1,5 @@
 const express = require('express');
 const { body } = require('express-validator');
-
 const { wrapAsync, issueJWT, handleValidationErrors } = require('../../util');
 const { isAuth } = require('../../middleware/auth');
 const AppError = require('../../AppError');
