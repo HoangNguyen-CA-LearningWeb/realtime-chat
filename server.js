@@ -13,7 +13,7 @@ const mongoString =
 mongoose
   .connect(mongoString)
   .then(() => {
-    console.log('connected to MongoDB');
+    console.log('Connected to MongoDB');
   })
   .catch((err) => {
     console.log(err);
