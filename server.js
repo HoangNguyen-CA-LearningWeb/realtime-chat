@@ -2,9 +2,12 @@ const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
-
+const http = require('http');
 const app = express();
-require('dotenv').config();
+const server = http.createServer(app);
+const { Server } = require('socket.io');
+const io = new Server(server);
+if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
 const port = process.env.PORT || 5000;
 const mongoString =
@@ -19,10 +22,20 @@ mongoose
     console.log(err);
   });
 
+app.use(morgan('common'));
 app.use(express.json());
-app.use(morgan('tiny'));
 
 app.use('/api/users', require('./routes/api/users'));
+
+io.on('connection', (socket) => {
+  console.log('New WS Connection...');
+});
+
+//custom error handler
+app.use((err, req, res, next) => {
+  const { status = 500, message = 'Something Went Wrong!' } = err;
+  res.status(status).json({ status, error: message });
+});
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static('client/build'));
@@ -32,12 +45,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-//custom error handler
-app.use((err, req, res, next) => {
-  const { status = 500, message = 'Something Went Wrong!' } = err;
-  res.status(status).json({ status, error: message });
-});
-
-app.listen(port, (req, res) => {
+server.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });

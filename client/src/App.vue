@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Lobby from '@/components/Lobby.vue';
 import Room from '@/components/Room/Room.vue';
+import { io } from 'socket.io-client';
 </script>
 
 <template>
