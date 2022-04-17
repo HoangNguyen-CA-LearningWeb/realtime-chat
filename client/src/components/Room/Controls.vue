@@ -1,7 +1,7 @@
 <script setup lang="ts">
 interface Props {
   room: string;
-  users: [string];
+  users: string[];
 }
 defineProps<Props>();
 </script>

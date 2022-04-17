@@ -4,6 +4,13 @@ import Header from '@/components/UI/Header.vue';
 import Button from '@/components/UI/Button.vue';
 import Chat from './Chat.vue';
 import Controls from './Controls.vue';
+import type { Message } from '@/types';
+
+interface Props {
+  messages: Message[];
+}
+
+defineProps<Props>();
 
 const message = ref('');
 
@@ -16,7 +23,7 @@ function handleSend() {
     <Header />
     <div class="flex h-96 items-center">
       <Controls room="Javascript" :users="['bob', 'steve']" />
-      <Chat />
+      <Chat :messages="messages" />
     </div>
     <div class="flex p-6 bg-blue-900">
       <input class="flex-grow text-black" v-model="message" autofocus />
