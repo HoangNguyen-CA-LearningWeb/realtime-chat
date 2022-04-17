@@ -3,3 +3,8 @@ export interface Message {
   text: string;
   date: Date;
 }
+
+export interface User {
+  userID: string;
+  username: string;
+}

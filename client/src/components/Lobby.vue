@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import Header from '@/components/UI/Header.vue';
 import Button from '@/components/UI/Button.vue';
 
+const emit = defineEmits(['join']);
+
+const username = ref('');
+
 function handleSubmit() {
-  console.log('Submit');
+  emit('join', username.value);
 }
 </script>
 <template>
@@ -12,13 +17,17 @@ function handleSubmit() {
     <div class="bg-blue-700 p-5">
       <form @submit.prevent="handleSubmit">
         <label
+          >Username:
+          <input v-model="username" class="text-black block" />
+        </label>
+        <label
           >Room:
           <select class="text-black block">
             <option selected disabled hidden value="">Select Room</option>
             <option value="javascript">Javascript</option>
           </select>
         </label>
-        <Button type="button">Join Room</Button>
+        <Button type="submit">Join Room</Button>
       </form>
     </div>
   </div>

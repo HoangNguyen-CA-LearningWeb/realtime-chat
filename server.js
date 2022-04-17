@@ -4,9 +4,15 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const http = require('http');
 const app = express();
+const cors = require('cors');
 const server = http.createServer(app);
 const { Server } = require('socket.io');
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+  },
+});
+
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
 const port = process.env.PORT || 5000;
@@ -22,13 +28,40 @@ mongoose
     console.log(err);
   });
 
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+  })
+);
 app.use(morgan('common'));
 app.use(express.json());
 
 app.use('/api/users', require('./routes/api/users'));
 
+io.use((socket, next) => {
+  const username = socket.handshake.auth.username;
+  if (!username) {
+    return next(new Error('invalid username'));
+  }
+  socket.username = username;
+  next();
+});
+
 io.on('connection', (socket) => {
-  console.log('New WS Connection...');
+  const users = [];
+  for (let [id, socket] of io.of('/').sockets) {
+    users.push({
+      userID: id,
+      username: socket.username,
+    });
+  }
+  socket.emit('users', users);
+
+  // notify existing users
+  socket.broadcast.emit('user connected', {
+    userID: socket.id,
+    username: socket.username,
+  });
 });
 
 //custom error handler
