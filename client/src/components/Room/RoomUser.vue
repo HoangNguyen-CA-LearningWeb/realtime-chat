@@ -9,7 +9,10 @@ defineProps<Props>();
 </script>
 <template>
   <div
-    :class="{ 'w-full p-4': true, 'cursor-pointer hover:bg-blue-700': !self }"
+    :class="{
+      'w-full p-4 border-b-2': true,
+      'cursor-pointer hover:bg-neutral-800': !self,
+    }"
   >
     {{ user.username }} {{ self ? '(Yourself)' : '' }}
   </div>

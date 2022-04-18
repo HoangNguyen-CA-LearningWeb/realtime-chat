@@ -25,9 +25,7 @@ function handleConnect(username: string) {
 </script>
 
 <template>
-  <div
-    class="flex bg-blue-100 h-screen justify-center items-center gap-2 flex-col"
-  >
+  <div class="flex bg-blue-100 h-screen items-center flex-col">
     <Lobby @join="handleConnect" />
     <Room />
   </div>

@@ -67,9 +67,9 @@ function handleSendMessage(message: string) {
 }
 </script>
 <template>
-  <div class="w-1/2 text-white">
+  <div class="w-full flex-grow text-white">
     <Header />
-    <div class="flex h-96 items-center">
+    <div class="flex h-full items-center">
       <Controls :users="users" @select-user="(user) => (room = user)" />
       <Chat :room="room" @send-message="handleSendMessage" />
     </div>

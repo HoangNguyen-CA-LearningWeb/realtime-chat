@@ -6,16 +6,12 @@ import Button from '@/components/UI/Button.vue';
 const emit = defineEmits(['join']);
 
 const username = ref('');
-
-function handleSubmit() {
-  emit('join', username.value);
-}
 </script>
 <template>
-  <div class="w-1/2 text-white">
+  <div class="w-full text-white">
     <Header />
-    <div class="bg-blue-700 p-5">
-      <form @submit.prevent="handleSubmit">
+    <div class="bg-stone-700 p-5">
+      <form @submit.prevent="emit('join', username)">
         <label
           >Username:
           <input v-model="username" class="text-black block" />

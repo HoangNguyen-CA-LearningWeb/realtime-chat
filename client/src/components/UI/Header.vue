@@ -2,5 +2,5 @@
 import Logo from './Logo.vue';
 </script>
 <template>
-  <div class="bg-blue-900 p-5 text-white"><Logo /></div>
+  <div class="bg-stone-800 p-5 text-white"><Logo /></div>
 </template>
