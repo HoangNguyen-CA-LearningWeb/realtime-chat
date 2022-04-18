@@ -49,18 +49,24 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
   const users = [];
-  for (let [id, socket] of io.of('/').sockets) {
-    users.push({
-      userID: id,
-      username: socket.username,
-    });
+
+  for (const socket of io.of('/').sockets.values()) {
+    users.push({ userID: socket.id, username: socket.username });
   }
+
   socket.emit('users', users);
 
   // notify existing users
   socket.broadcast.emit('user connected', {
     userID: socket.id,
     username: socket.username,
+  });
+
+  socket.on('private message', ({ content, to }) => {
+    socket.to(to).emit('private message', {
+      content,
+      from: socket.id,
+    });
   });
 });
 

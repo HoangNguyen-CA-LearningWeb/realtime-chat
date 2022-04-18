@@ -1,14 +1,23 @@
 <script setup lang="ts">
-import type { User } from '@/types';
+import type { Room } from '@/types';
+import RoomUser from './RoomUser.vue';
+import { useAuth } from '@/composables/auth';
+const { authUser } = useAuth();
+
 interface Props {
-  users: User[];
+  users: Room[];
 }
 defineProps<Props>();
+const emit = defineEmits(['selectUser']);
 </script>
 
 <template>
-  <div class="bg-blue-600 h-full p-6">
-    <h2 class="font-bold">Users:</h2>
-    <div v-for="user in users">{{ user.username }}</div>
+  <div class="bg-blue-600 h-full w-52">
+    <RoomUser
+      v-for="user in users"
+      :user="user"
+      :self="user.username === authUser"
+      @click="emit('selectUser', user)"
+    />
   </div>
 </template>
