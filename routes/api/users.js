@@ -10,19 +10,19 @@ const router = express.Router();
 // register an user
 router.post(
   '/register',
-  body('email').isEmail().withMessage('email is not valid').normalizeEmail(),
+  body('username'),
   body('password')
     .isLength({ min: 5 })
     .withMessage('password must have a minimum length of 5'),
   wrapAsync(async (req, res) => {
     handleValidationErrors(req);
 
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    const foundUser = await User.findOne({ email });
+    const foundUser = await User.findOne({ username });
     if (foundUser) throw new AppError(400, 'user already exists');
 
-    const newUser = new User({ email, password });
+    const newUser = new User({ username, password });
     const savedUser = await newUser.save();
 
     savedUser.password = undefined; // !important
@@ -35,16 +35,16 @@ router.post(
 //user login
 router.post(
   '/login',
-  body('email').isEmail().withMessage('email is not valid').normalizeEmail(),
+  body('username'),
   body('password')
     .isLength({ min: 5 })
     .withMessage('password must have a minimum length of 5'),
   wrapAsync(async (req, res) => {
     handleValidationErrors(req);
 
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    const foundUser = await User.findOne({ email }).select('+password');
+    const foundUser = await User.findOne({ username }).select('+password');
     if (!foundUser) throw new AppError(400, 'user does not exist');
 
     const isValid = await foundUser.verifyPassword(password);

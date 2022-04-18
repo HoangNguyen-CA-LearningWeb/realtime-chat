@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { User } from '@/types';
+import type { Room } from '@/types';
 interface Props {
-  user: User;
+  user: Room;
   self: boolean;
 }
 
@@ -14,6 +14,7 @@ defineProps<Props>();
       'cursor-pointer hover:bg-neutral-800': !self,
     }"
   >
-    {{ user.username }} {{ self ? '(Yourself)' : '' }}
+    <p>{{ user.username }} {{ self ? '(Yourself)' : '' }}</p>
+    <p>{{ user.connected ? 'Connected' : 'Not Connected' }}</p>
   </div>
 </template>

@@ -12,7 +12,7 @@ const users = ref<Room[]>([]);
 const room = ref<Room | null>(null);
 
 const initRoom = (user: User): Room => {
-  return { ...user, messages: [], hasNewMessages: false, connected: false };
+  return { ...user, messages: [], hasNewMessages: false, connected: true };
 };
 
 socket.on('users', (socketUsers: User[]) => {
@@ -28,6 +28,22 @@ socket.on('users', (socketUsers: User[]) => {
 
 socket.on('user connected', (user: User) => {
   users.value.push(initRoom(user));
+});
+
+socket.on('connect', () => {
+  users.value.forEach((u) => {
+    if (u.username === authUser.value) {
+      u.connected = true;
+    }
+  });
+});
+
+socket.on('disconnect', () => {
+  users.value.forEach((u) => {
+    if (u.username === authUser.value) {
+      u.connected = false;
+    }
+  });
 });
 
 socket.on('private message', ({ content, from }) => {

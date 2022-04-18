@@ -14,15 +14,13 @@ const username = ref('');
       <form @submit.prevent="emit('join', username)">
         <label
           >Username:
-          <input v-model="username" class="text-black block" />
+          <input v-model="username" type="text" class="text-black block" />
         </label>
         <label
-          >Room:
-          <select class="text-black block">
-            <option selected disabled hidden value="">Select Room</option>
-            <option value="javascript">Javascript</option>
-          </select>
+          >Password:
+          <input v-model="username" type="password" class="text-black block" />
         </label>
+
         <Button type="submit">Join Room</Button>
       </form>
     </div>
