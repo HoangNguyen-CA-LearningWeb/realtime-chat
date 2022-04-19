@@ -5,20 +5,21 @@ import Button from '@/components/UI/Button.vue';
 
 const emit = defineEmits(['join']);
 
-const username = ref('');
+const username = ref('steve');
+const password = ref('password');
 </script>
 <template>
   <div class="w-full text-white">
     <Header />
     <div class="bg-stone-700 p-5">
-      <form @submit.prevent="emit('join', username)">
+      <form @submit.prevent="emit('join', username, password)">
         <label
           >Username:
           <input v-model="username" type="text" class="text-black block" />
         </label>
         <label
           >Password:
-          <input v-model="username" type="password" class="text-black block" />
+          <input v-model="password" type="password" class="text-black block" />
         </label>
 
         <Button type="submit">Join Room</Button>

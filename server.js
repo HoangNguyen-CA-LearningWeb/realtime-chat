@@ -1,19 +1,20 @@
 const express = require('express');
+if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 const path = require('path');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const http = require('http');
 const app = express();
 const cors = require('cors');
-const server = http.createServer(app);
 const { Server } = require('socket.io');
+
+const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:3000',
   },
 });
-
-if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 
 const port = process.env.PORT || 5000;
 const mongoString =
@@ -36,39 +37,9 @@ app.use(
 app.use(morgan('common'));
 app.use(express.json());
 
+require('./socket')(io);
+
 app.use('/api/users', require('./routes/api/users'));
-
-io.use((socket, next) => {
-  const username = socket.handshake.auth.username;
-  if (!username) {
-    return next(new Error('invalid username'));
-  }
-  socket.username = username;
-  next();
-});
-
-io.on('connection', (socket) => {
-  const users = [];
-
-  for (const socket of io.of('/').sockets.values()) {
-    users.push({ userID: socket.id, username: socket.username });
-  }
-
-  socket.emit('users', users);
-
-  // notify existing users
-  socket.broadcast.emit('user connected', {
-    userID: socket.id,
-    username: socket.username,
-  });
-
-  socket.on('private message', ({ content, to }) => {
-    socket.to(to).emit('private message', {
-      content,
-      from: socket.id,
-    });
-  });
-});
 
 //custom error handler
 app.use((err, req, res, next) => {

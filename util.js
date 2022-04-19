@@ -23,6 +23,10 @@ const issueJWT = (user) => {
   return `Bearer ${signedToken}`;
 };
 
+const wrapSocketMiddleware = (middleware) => (socket, next) => {
+  middleware(socket.request, {}, next);
+};
+
 const handleValidationErrors = (req) => {
   const errors = validationResult(req).array();
   if (errors.length === 0) return;
@@ -33,4 +37,5 @@ module.exports = {
   wrapAsync,
   issueJWT,
   handleValidationErrors,
+  wrapSocketMiddleware,
 };
