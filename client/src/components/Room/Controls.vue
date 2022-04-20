@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { Room } from '@/types';
 import RoomUser from './RoomUser.vue';
-import { useAuth } from '@/composables/auth';
-const { authUser } = useAuth();
+import { getAuthUser } from '@/store/auth';
 
 interface Props {
   users: Room[];
@@ -19,7 +18,7 @@ const emit = defineEmits(['selectUser']);
     <RoomUser
       v-for="user in users"
       :user="user"
-      :self="user.username === authUser"
+      :self="user.username === getAuthUser()?.username"
       @click="emit('selectUser', user)"
     />
   </div>

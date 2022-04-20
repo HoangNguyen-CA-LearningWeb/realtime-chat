@@ -38,8 +38,6 @@ module.exports = function (io) {
     });
 
     socket.on('private message', ({ content, to }) => {
-      console.log(`private message: ${content} to: ${to}`);
-
       socket.to(to).to(socket.user._id.toString()).emit('private message', {
         content,
         from: socket.user._id,

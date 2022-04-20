@@ -5,9 +5,8 @@ import Header from '@/components/UI/Header.vue';
 import Chat from './Chat.vue';
 import Controls from './Controls.vue';
 import type { User, Room } from '@/types';
-import { useAuth } from '@/composables/auth';
+import { getAuthUser } from '@/store/auth';
 
-const { authUser } = useAuth();
 const users = ref<Room[]>([]);
 const room = ref<Room | null>(null);
 
@@ -19,8 +18,8 @@ socket.on('users', (socketUsers: User[]) => {
   users.value = socketUsers
     .map((u) => initRoom(u))
     .sort((a, b) => {
-      if (a.username === authUser.value) return -1;
-      if (b.username === authUser.value) return 1;
+      if (a.username === getAuthUser()?.username) return -1;
+      if (b.username === getAuthUser()?.username) return 1;
       if (a.username < b.username) return -1;
       return a.username > b.username ? 1 : 0;
     });
@@ -32,7 +31,7 @@ socket.on('user connected', (user: User) => {
 
 socket.on('connect', () => {
   users.value.forEach((u) => {
-    if (u.username === authUser.value) {
+    if (u.username === getAuthUser()?.username) {
       u.connected = true;
     }
   });
@@ -40,7 +39,7 @@ socket.on('connect', () => {
 
 socket.on('disconnect', () => {
   users.value.forEach((u) => {
-    if (u.username === authUser.value) {
+    if (u.username === getAuthUser()?.username) {
       u.connected = false;
     }
   });
@@ -75,7 +74,7 @@ function handleSendMessage(message: string) {
       to: room.value.userID,
     });
     room.value.messages.push({
-      user: authUser.value,
+      user: getAuthUser()?.username || 'NO USER',
       text: message,
       date: new Date(),
     });
