@@ -11,6 +11,12 @@ const isAuth = wrapAsync(async (req, res, next) => {
     throw new AppError(401, 'no token provided');
 
   const tokenParts = req.headers.authorization.split(' ');
+  const user = await verifyToken(tokenParts);
+  req.user = user; // attach user to request object
+  next();
+});
+
+const verifyToken = async (tokenParts) => {
   if (
     tokenParts[0] !== 'Bearer' ||
     !tokenParts[1] ||
@@ -24,10 +30,10 @@ const isAuth = wrapAsync(async (req, res, next) => {
 
   const userId = tokenPayload.sub;
   const user = await User.findById(userId);
+  return user;
+};
 
-  req.user = user; // attach user to request object
-  next();
-});
 module.exports = {
   isAuth,
+  verifyToken,
 };

@@ -1,22 +1,13 @@
-const jsonwebtoken = require('jsonwebtoken');
-const PUB_KEY = Buffer.from(process.env.PUB_KEY, 'base64').toString('utf-8');
-const User = require('./models/User');
+const { verifyToken } = require('./middleware/auth');
 
 module.exports = function (io) {
   io.use(async (socket, next) => {
     try {
       const tokenParts = socket.handshake.auth.token.split(' ');
-      if (tokenParts[0] !== 'Bearer' || !tokenParts[1]) throw new Error();
-      const tokenPayload = jsonwebtoken.verify(tokenParts[1], PUB_KEY, {
-        algorithms: ['RS256'],
-      });
-
-      const userId = tokenPayload.sub;
-      const user = await User.findById(userId);
+      const user = await verifyToken(tokenParts);
       socket.user = user; // attach user to request object
       next();
     } catch (e) {
-      console.log(e);
       return next(new Error('authentication failed'));
     }
   });
@@ -42,6 +33,14 @@ module.exports = function (io) {
         content,
         from: socket.user._id,
       });
+    });
+
+    socket.on('disconnect', async () => {
+      const matchingSockets = await io.in(socket.user_id).allSockets();
+      const isDisconnected = matchingSockets.size === 0;
+      if (isDisconnected) {
+        socket.broadcast.emit('user disconnected', socket.user._id);
+      }
     });
   });
 };

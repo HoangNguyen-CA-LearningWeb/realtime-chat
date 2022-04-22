@@ -26,8 +26,10 @@ onUnmounted(() => {
 
 async function handleConnect(username: string, password: string) {
   const token = await login(username, password);
-  socket.auth = { token };
-  socket.connect();
+  if (token) {
+    socket.auth = { token };
+    socket.connect();
+  }
 }
 </script>
 

@@ -14,21 +14,6 @@ const initRoom = (user: User): Room => {
   return { ...user, messages: [], hasNewMessages: false, connected: true };
 };
 
-socket.on('users', (socketUsers: User[]) => {
-  users.value = socketUsers
-    .map((u) => initRoom(u))
-    .sort((a, b) => {
-      if (a.username === getAuthUser()?.username) return -1;
-      if (b.username === getAuthUser()?.username) return 1;
-      if (a.username < b.username) return -1;
-      return a.username > b.username ? 1 : 0;
-    });
-});
-
-socket.on('user connected', (user: User) => {
-  users.value.push(initRoom(user));
-});
-
 socket.on('connect', () => {
   users.value.forEach((u) => {
     if (u.username === getAuthUser()?.username) {
@@ -43,6 +28,40 @@ socket.on('disconnect', () => {
       u.connected = false;
     }
   });
+});
+
+socket.on('users', (socketUsers: User[]) => {
+  //TODO: BROKEN FOR SAME USER JOINING!
+
+  users.value = socketUsers
+    .map((u) => initRoom(u))
+    .sort((a, b) => {
+      if (a.username === getAuthUser()?.username) return -1;
+      if (b.username === getAuthUser()?.username) return 1;
+      if (a.username < b.username) return -1;
+      return a.username > b.username ? 1 : 0;
+    });
+});
+
+socket.on('user connected', (user: User) => {
+  for (let i = 0; i < users.value.length; i++) {
+    const existingUser = users.value[i];
+    if (existingUser.userID === user.userID) {
+      existingUser.connected = true;
+      return;
+    }
+  }
+  users.value.push(initRoom(user));
+});
+
+socket.on('user disconnected', (id) => {
+  for (let i = 0; i < users.value.length; i++) {
+    const user = users.value[i];
+    if (user.userID === id) {
+      user.connected = false;
+      break;
+    }
+  }
 });
 
 socket.on('private message', ({ content, from }) => {
@@ -63,8 +82,12 @@ socket.on('private message', ({ content, from }) => {
 });
 
 onUnmounted(() => {
+  socket.off('connect');
+  socket.off('disconnect');
   socket.off('users');
   socket.off('user connected');
+  socket.off('user disconnected');
+  socket.off('private message');
 });
 
 function handleSendMessage(message: string) {

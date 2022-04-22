@@ -33,20 +33,24 @@ export async function loadUser() {
 }
 
 export async function login(username: string, password: string) {
-  const res = await fetch('/api/users/login', {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method: 'POST',
-    body: JSON.stringify({
-      username,
-      password,
-    }),
-  });
+  try {
+    const res = await fetch('/api/users/login', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        username,
+        password,
+      }),
+    });
 
-  const data = await res.json();
-  token.value = data.token;
-  authUser.value = data.user;
-  sessionStorage.setItem('token', data.token);
-  return token.value;
+    const data = await res.json();
+    token.value = data.token;
+    authUser.value = data.user;
+    sessionStorage.setItem('token', data.token);
+    return token.value;
+  } catch (e) {
+    console.log(e);
+  }
 }
