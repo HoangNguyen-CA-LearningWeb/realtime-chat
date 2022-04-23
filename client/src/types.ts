@@ -7,10 +7,10 @@ export interface Message {
 export interface User {
   userID: string;
   username: string;
+  connected: boolean;
 }
 
 export interface Room extends User {
   messages: Message[];
-  connected: boolean;
   hasNewMessages: boolean;
 }

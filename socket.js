@@ -44,6 +44,7 @@ module.exports = function (io) {
       });
 
       socket.on('private message', ({ content, to }) => {
+        // send to own room to send to other browsers logged on to same user, is not sent to current socket!
         socket.to(to).to(socket.user._id.toString()).emit('private message', {
           content,
           from: socket.user._id,

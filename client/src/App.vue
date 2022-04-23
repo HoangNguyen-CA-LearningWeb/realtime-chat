@@ -6,10 +6,13 @@ import socket from '@/socket';
 import { login, clearAuthUser, loadUser } from '@/store/auth';
 
 socket.on('connect_error', (err) => {
-  console.error(err.message);
-  if (err.message === 'invalid username') {
+  if (err.message === 'authentication failed') {
     clearAuthUser();
   }
+});
+
+onUnmounted(() => {
+  socket.off('connect_error');
 });
 
 onMounted(async () => {
@@ -18,10 +21,6 @@ onMounted(async () => {
     socket.auth = { token };
     socket.connect();
   }
-});
-
-onUnmounted(() => {
-  socket.off('connect_error');
 });
 
 async function handleConnect(username: string, password: string) {

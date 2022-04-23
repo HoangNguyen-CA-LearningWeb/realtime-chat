@@ -10,6 +10,7 @@ export function getAuthUser() {
 
 export function clearAuthUser() {
   authUser.value = null;
+  sessionStorage.removeItem('token');
 }
 
 export async function loadUser() {

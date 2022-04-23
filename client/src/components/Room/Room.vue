@@ -11,7 +11,7 @@ const users = ref<Room[]>([]);
 const room = ref<Room | null>(null);
 
 const initRoom = (user: User): Room => {
-  return { ...user, messages: [], hasNewMessages: false, connected: true };
+  return { ...user, messages: [], hasNewMessages: false };
 };
 
 socket.on('connect', () => {
@@ -31,8 +31,6 @@ socket.on('disconnect', () => {
 });
 
 socket.on('users', (socketUsers: User[]) => {
-  //TODO: BROKEN FOR SAME USER JOINING!
-
   users.value = socketUsers
     .map((u) => initRoom(u))
     .sort((a, b) => {
@@ -44,27 +42,18 @@ socket.on('users', (socketUsers: User[]) => {
 });
 
 socket.on('user connected', (user: User) => {
-  for (let i = 0; i < users.value.length; i++) {
-    const existingUser = users.value[i];
-    if (existingUser.userID === user.userID) {
-      existingUser.connected = true;
-      return;
-    }
-  }
-  users.value.push(initRoom(user));
+  const existingUser = users.value.find((u) => u.userID === user.userID);
+  if (existingUser) existingUser.connected = true;
+  else users.value.push(initRoom(user));
 });
 
 socket.on('user disconnected', (id) => {
-  for (let i = 0; i < users.value.length; i++) {
-    const user = users.value[i];
-    if (user.userID === id) {
-      user.connected = false;
-      break;
-    }
-  }
+  const existingUser = users.value.find((u) => u.userID === id);
+  if (existingUser) existingUser.connected = false;
 });
 
-socket.on('private message', ({ content, from }) => {
+socket.on('private message', ({ content, from, to }) => {
+  // TODO: FIX BUG!, sending message from steve to harvey, other instance of steve doesn't not get message in correct room, must account for [to] variable!
   for (let i = 0; i < users.value.length; i++) {
     const user = users.value[i];
     if (user.userID === from) {
@@ -91,13 +80,14 @@ onUnmounted(() => {
 });
 
 function handleSendMessage(message: string) {
-  if (room.value) {
+  let auth = getAuthUser();
+  if (room.value && auth) {
     socket.emit('private message', {
       content: message,
       to: room.value.userID,
     });
     room.value.messages.push({
-      user: getAuthUser()?.username || 'NO USER',
+      user: auth.username,
       text: message,
       date: new Date(),
     });
