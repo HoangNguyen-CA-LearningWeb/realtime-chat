@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
+  connected: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 userSchema.pre('save', async function (next) {

@@ -22,7 +22,7 @@ router.post(
     const foundUser = await User.findOne({ username });
     if (foundUser) throw new AppError(400, 'user already exists');
 
-    const newUser = new User({ username, password });
+    const newUser = new User({ username, password, connected: false });
     const savedUser = await newUser.save();
 
     savedUser.password = undefined; // !important
