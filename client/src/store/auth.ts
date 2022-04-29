@@ -1,12 +1,8 @@
 import { ref } from 'vue';
 import type { User } from '../types';
 
-const authUser = ref<User | null>(null);
+export const authUser = ref<User | null>(null);
 const token = ref(sessionStorage.getItem('token'));
-
-export function getAuthUser() {
-  return authUser.value;
-}
 
 export function clearAuthUser() {
   authUser.value = null;
@@ -23,8 +19,8 @@ export async function loadUser() {
         },
         method: 'GET',
       });
-      const data = await res.json();
-      authUser.value = data;
+      const user = await res.json();
+      authUser.value = initAPIUser(user);
       return token.value;
     }
   } catch (e) {
@@ -48,10 +44,22 @@ export async function login(username: string, password: string) {
 
     const data = await res.json();
     token.value = data.token;
-    authUser.value = data.user;
+    authUser.value = initAPIUser(data.user);
     sessionStorage.setItem('token', data.token);
     return token.value;
   } catch (e) {
     console.log(e);
   }
 }
+
+const initAPIUser = (u: {
+  username: string;
+  _id: string;
+  connected: boolean;
+}) => {
+  return {
+    userID: u._id,
+    connected: u.connected,
+    username: u.username,
+  };
+};

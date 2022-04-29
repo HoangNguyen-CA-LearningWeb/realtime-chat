@@ -5,7 +5,7 @@ import Header from '@/components/UI/Header.vue';
 import Chat from './Chat.vue';
 import Controls from './Controls.vue';
 import type { User, Room } from '@/types';
-import { getAuthUser } from '@/store/auth';
+import { authUser } from '@/store/auth';
 
 const users = ref<Room[]>([]);
 const room = ref<Room | null>(null);
@@ -16,7 +16,7 @@ const initRoom = (user: User): Room => {
 
 socket.on('connect', () => {
   users.value.forEach((u) => {
-    if (u.username === getAuthUser()?.username) {
+    if (u.username === authUser.value?.username) {
       u.connected = true;
     }
   });
@@ -24,7 +24,7 @@ socket.on('connect', () => {
 
 socket.on('disconnect', () => {
   users.value.forEach((u) => {
-    if (u.username === getAuthUser()?.username) {
+    if (u.username === authUser.value?.username) {
       u.connected = false;
     }
   });
@@ -34,8 +34,8 @@ socket.on('users', (socketUsers: User[]) => {
   users.value = socketUsers
     .map((u) => initRoom(u))
     .sort((a, b) => {
-      if (a.username === getAuthUser()?.username) return -1;
-      if (b.username === getAuthUser()?.username) return 1;
+      if (a.username === authUser.value?.username) return -1;
+      if (b.username === authUser.value?.username) return 1;
       if (a.username < b.username) return -1;
       return a.username > b.username ? 1 : 0;
     });
@@ -53,10 +53,10 @@ socket.on('user disconnected', (id) => {
 });
 
 socket.on('private message', ({ content, from, to }) => {
-  // TODO: FIX BUG!, sending message from steve to harvey, other instance of steve doesn't not get message in correct room, must account for [to] variable!
   for (let i = 0; i < users.value.length; i++) {
     const user = users.value[i];
-    if (user.userID === from) {
+    const fromSelf = authUser.value?.userID === from;
+    if (user.userID === (fromSelf ? to : from)) {
       user.messages.push({
         user: user.username,
         text: content,
@@ -80,7 +80,7 @@ onUnmounted(() => {
 });
 
 function handleSendMessage(message: string) {
-  let auth = getAuthUser();
+  let auth = authUser.value;
   if (room.value && auth) {
     socket.emit('private message', {
       content: message,
