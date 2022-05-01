@@ -57,6 +57,12 @@ const initAPIUser = (u: {
   _id: string;
   connected: boolean;
 }) => {
+  if (
+    u._id === undefined ||
+    u.username === undefined ||
+    u.connected === undefined
+  )
+    throw new Error('API User incorrect format');
   return {
     userID: u._id,
     connected: u.connected,

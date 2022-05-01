@@ -1,5 +1,6 @@
 const jsonwebtoken = require('jsonwebtoken');
 const validator = require('validator');
+const User = require('../models/User');
 
 const PUB_KEY = Buffer.from(process.env.PUB_KEY, 'base64').toString('utf-8');
 

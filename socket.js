@@ -1,12 +1,13 @@
 const { verifyToken } = require('./middleware/auth');
-const { db } = require('./models/User');
 const User = require('./models/User');
+const Message = require('./models/Message');
 
 module.exports = function (io) {
   io.use(async (socket, next) => {
     try {
       const tokenParts = socket.handshake.auth.token.split(' ');
       const user = await verifyToken(tokenParts);
+      if (!user) throw new Error('Token user not found');
       socket.user = user; // attach user to request object
       next();
     } catch (e) {
@@ -26,11 +27,29 @@ module.exports = function (io) {
 
       const dbUsers = await User.find({});
 
+      const messagesMap = new Map();
+      const messages = await Message.find({
+        $or: [{ from: socket.user._id }, { to: socket.user._id }],
+      });
+
+      messages.forEach((message) => {
+        const { from, to } = message;
+        let receive;
+        if (to === socket.user._id) receive = to.toString();
+        else receive = from.toString();
+        if (messagesMap.has(receive)) {
+          messagesMap.get(receive).push(message);
+        } else {
+          messagesMap.set(receive, [message]);
+        }
+      });
+
       dbUsers.forEach((u) => {
         users.push({
           userID: u._id,
           username: u.username,
           connected: u.connected,
+          messages: messagesMap.get(u._id.toString()) || [],
         });
       });
 
@@ -43,13 +62,20 @@ module.exports = function (io) {
         connected: true,
       });
 
-      socket.on('private message', ({ content, to }) => {
+      socket.on('private message', async ({ content, to }) => {
         // send to own room to send to other browsers logged on to same user, is not sent to current socket!
-        socket.to(to).to(socket.user._id.toString()).emit('private message', {
+        const message = {
           content,
           from: socket.user._id,
           to,
-        });
+        };
+        socket
+          .to(to)
+          .to(socket.user._id.toString())
+          .emit('private message', message);
+
+        const dbMessage = new Message({ content, to, from: socket.user._id });
+        await dbMessage.save();
       });
 
       socket.on('disconnect', async () => {
@@ -57,8 +83,7 @@ module.exports = function (io) {
         const isDisconnected = matchingSockets.size === 0;
         if (isDisconnected) {
           socket.broadcast.emit('user disconnected', socket.user._id);
-          // update in DB.
-          socket.user.connected = false;
+          socket.user.connected = false; // update in DB.
           await socket.user.save();
         }
       });
