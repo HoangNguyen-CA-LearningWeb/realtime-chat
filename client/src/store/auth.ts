@@ -1,7 +1,7 @@
 import { ref } from 'vue';
-import type { User } from '../types';
+import type { AuthUser } from '../types';
 
-export const authUser = ref<User | null>(null);
+export const authUser = ref<AuthUser | null>(null);
 const token = ref(sessionStorage.getItem('token'));
 
 export function clearAuthUser() {
@@ -65,7 +65,6 @@ const initAPIUser = (u: {
     throw new Error('API User incorrect format');
   return {
     userID: u._id,
-    connected: u.connected,
     username: u.username,
   };
 };

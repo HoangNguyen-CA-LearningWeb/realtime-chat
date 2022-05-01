@@ -18,7 +18,7 @@ const emit = defineEmits(['selectUser']);
     <RoomUser
       v-for="user in users"
       :user="user"
-      :self="user.username === authUser.username"
+      :self="user.username === authUser?.username"
       @click="emit('selectUser', user)"
     />
   </div>

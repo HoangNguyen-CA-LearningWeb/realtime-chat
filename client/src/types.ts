@@ -4,13 +4,22 @@ export interface Message {
   date: Date;
 }
 
-export interface User {
+export interface APIUser {
   userID: string;
   username: string;
   connected: boolean;
+  messages: [{ from: string; to: string; content: string }];
 }
 
-export interface Room extends User {
+export interface Room {
+  userID: string;
+  username: string;
+  connected: boolean;
   messages: Message[];
   hasNewMessages: boolean;
+}
+
+export interface AuthUser {
+  userID: string;
+  username: string;
 }

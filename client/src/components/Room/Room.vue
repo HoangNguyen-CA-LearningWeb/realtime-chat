@@ -4,14 +4,21 @@ import socket from '@/socket';
 import Header from '@/components/UI/Header.vue';
 import Chat from './Chat.vue';
 import Controls from './Controls.vue';
-import type { User, Room } from '@/types';
+import type { APIUser, Room, Message } from '@/types';
 import { authUser } from '@/store/auth';
 
 const users = ref<Room[]>([]);
 const room = ref<Room | null>(null);
 
-const initRoom = (user: User): Room => {
-  return { ...user, messages: [], hasNewMessages: false };
+const initRoom = (user: APIUser): Room => {
+  const messages: Message[] = user.messages.map((m) => {
+    return {
+      user: m.from,
+      text: m.content,
+      date: new Date(),
+    };
+  });
+  return { ...user, messages, hasNewMessages: false };
 };
 
 socket.on('connect', () => {
@@ -30,7 +37,7 @@ socket.on('disconnect', () => {
   });
 });
 
-socket.on('users', (socketUsers: User[]) => {
+socket.on('users', (socketUsers: APIUser[]) => {
   users.value = socketUsers
     .map((u) => initRoom(u))
     .sort((a, b) => {
@@ -41,7 +48,7 @@ socket.on('users', (socketUsers: User[]) => {
     });
 });
 
-socket.on('user connected', (user: User) => {
+socket.on('user connected', (user: APIUser) => {
   const existingUser = users.value.find((u) => u.userID === user.userID);
   if (existingUser) existingUser.connected = true;
   else users.value.push(initRoom(user));

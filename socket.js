@@ -33,14 +33,14 @@ module.exports = function (io) {
       });
 
       messages.forEach((message) => {
-        const { from, to } = message;
-        let receive;
-        if (to === socket.user._id) receive = to.toString();
-        else receive = from.toString();
-        if (messagesMap.has(receive)) {
-          messagesMap.get(receive).push(message);
+        let { from, to } = message;
+        from = from.toString();
+        to = to.toString();
+        const otherUser = socket.user._id.toString() === from ? to : from;
+        if (messagesMap.has(otherUser)) {
+          messagesMap.get(otherUser).push(message);
         } else {
-          messagesMap.set(receive, [message]);
+          messagesMap.set(otherUser, [message]);
         }
       });
 
@@ -60,6 +60,7 @@ module.exports = function (io) {
         userID: socket.user._id,
         username: socket.user.username,
         connected: true,
+        messages: [],
       });
 
       socket.on('private message', async ({ content, to }) => {
