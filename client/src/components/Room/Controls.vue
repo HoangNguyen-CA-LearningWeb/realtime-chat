@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Room } from '@/types';
 import RoomUser from './RoomUser.vue';
-import { authUser } from '@/store/auth';
+import { authUser, clearAuthUser } from '@/store/auth';
 
 interface Props {
   users: Room[];
@@ -21,5 +21,6 @@ const emit = defineEmits(['selectUser']);
       :self="user.username === authUser?.username"
       @click="emit('selectUser', user)"
     />
+    <button @click="clearAuthUser">Logout</button>
   </div>
 </template>

@@ -3,7 +3,7 @@ import { onUnmounted, onMounted } from 'vue';
 import Lobby from '@/components/Lobby.vue';
 import Room from '@/components/Room/Room.vue';
 import socket from '@/socket';
-import { login, clearAuthUser, loadUser } from '@/store/auth';
+import { login, clearAuthUser, loadUser, authUser } from '@/store/auth';
 
 socket.on('connect_error', (err) => {
   if (err.message === 'authentication failed') {
@@ -34,7 +34,7 @@ async function handleConnect(username: string, password: string) {
 
 <template>
   <div class="flex bg-blue-100 h-screen items-center flex-col">
-    <Lobby @join="handleConnect" />
-    <Room />
+    <Lobby @join="handleConnect" v-if="!authUser" />
+    <Room v-else />
   </div>
 </template>

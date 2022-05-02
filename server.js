@@ -34,7 +34,7 @@ app.use(
     origin: 'http://localhost:3000',
   })
 );
-app.use(morgan('common'));
+app.use(morgan('dev'));
 app.use(express.json());
 
 require('./socket')(io);

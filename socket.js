@@ -30,20 +30,29 @@ module.exports = function (io) {
       const messagesMap = new Map();
       const messages = await Message.find({
         $or: [{ from: socket.user._id }, { to: socket.user._id }],
-      });
+      }).populate('from');
 
       messages.forEach((message) => {
         let { from, to } = message;
-        from = from.toString();
         to = to.toString();
-        const otherUser = socket.user._id.toString() === from ? to : from;
+        const otherUser =
+          socket.user._id.toString() === from._id.toString()
+            ? to
+            : from._id.toString();
+
+        const newMessage = {
+          to: message.to,
+          content: message.content,
+          from: message.from.username,
+        };
         if (messagesMap.has(otherUser)) {
-          messagesMap.get(otherUser).push(message);
+          messagesMap.get(otherUser).push(newMessage);
         } else {
-          messagesMap.set(otherUser, [message]);
+          messagesMap.set(otherUser, [newMessage]);
         }
       });
 
+      // message format: {from: username, content: string, to: ObjectID}
       dbUsers.forEach((u) => {
         users.push({
           userID: u._id,
@@ -64,10 +73,10 @@ module.exports = function (io) {
       });
 
       socket.on('private message', async ({ content, to }) => {
-        // send to own room to send to other browsers logged on to same user, is not sent to current socket!
+        // send to own room to send to other browsers logged on to same user, is not sent to current socket! {from: username, content: string, to: ObjectID}
         const message = {
           content,
-          from: socket.user._id,
+          from: socket.user.username,
           to,
         };
         socket

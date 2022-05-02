@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import type { AuthUser } from '../types';
+import socket from '@/socket';
 
 export const authUser = ref<AuthUser | null>(null);
 const token = ref(sessionStorage.getItem('token'));
@@ -7,6 +8,7 @@ const token = ref(sessionStorage.getItem('token'));
 export function clearAuthUser() {
   authUser.value = null;
   sessionStorage.removeItem('token');
+  socket.disconnect();
 }
 
 export async function loadUser() {

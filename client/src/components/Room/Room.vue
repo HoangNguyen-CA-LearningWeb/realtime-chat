@@ -37,17 +37,6 @@ socket.on('disconnect', () => {
   });
 });
 
-socket.on('users', (socketUsers: APIUser[]) => {
-  users.value = socketUsers
-    .map((u) => initRoom(u))
-    .sort((a, b) => {
-      if (a.username === authUser.value?.username) return -1;
-      if (b.username === authUser.value?.username) return 1;
-      if (a.username < b.username) return -1;
-      return a.username > b.username ? 1 : 0;
-    });
-});
-
 socket.on('user connected', (user: APIUser) => {
   const existingUser = users.value.find((u) => u.userID === user.userID);
   if (existingUser) existingUser.connected = true;
@@ -59,13 +48,27 @@ socket.on('user disconnected', (id) => {
   if (existingUser) existingUser.connected = false;
 });
 
+socket.on('users', (socketUsers: APIUser[]) => {
+  users.value = socketUsers
+    .map((u) => initRoom(u))
+    .sort((a, b) => {
+      if (a.username === authUser.value?.username) return -1;
+      if (b.username === authUser.value?.username) return 1;
+      if (a.username < b.username) return -1;
+      return a.username > b.username ? 1 : 0;
+    });
+});
+
 socket.on('private message', ({ content, from, to }) => {
   for (let i = 0; i < users.value.length; i++) {
     const user = users.value[i];
-    const fromSelf = authUser.value?.userID === from;
-    if (user.userID === (fromSelf ? to : from)) {
+    const fromSelf = authUser.value?.username === from;
+    if (
+      (fromSelf && user.userID === to) ||
+      (!fromSelf && user.username === from)
+    ) {
       user.messages.push({
-        user: user.username,
+        user: from,
         text: content,
         date: new Date(),
       });
